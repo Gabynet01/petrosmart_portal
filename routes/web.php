@@ -55,6 +55,7 @@ Route::get('/companyVouchersList', 'CompanyVouchersController@index')->name('Com
 Route::any('/getFuelVouchersDataApi', 'CompanyVouchersController@getFuelVouchersDataApi');
 Route::post('/addPetrosmartFuelVouchersApi', 'CompanyVouchersController@addPetrosmartFuelVouchersApi');
 Route::any('/getVoucherUsageTypeApi', 'CompanyVouchersController@getVoucherUsageTypeApi');
+Route::post('/checkWalletBalanceApi', 'CompanyVouchersController@checkWalletBalanceApi');
 
 //Handle everything driver vouchers here
 Route::get('/driverVouchersList', 'DriverVouchersController@index')->name('Driver Vouchers')->middleware(RedirectIfNotLoggedIn::class);
@@ -197,6 +198,7 @@ Route::any('/manageFleetManagers', 'FleetManagerController@manageApplicationUser
 Route::post('/addFleetManagerApi', 'FleetManagerController@addFleetManagerApi');
 Route::any('/getFleetManagersDataApi', 'FleetManagerController@getFleetManagersData');
 Route::any('/getFleetManagersRequestsDataApi', 'FleetManagerController@getFleetManagersRequestsDataApi');
+Route::any('/getManagersArrayApi', 'FleetManagerController@getManagersArrayApi');
 Route::post('/editFleetManagerApi', 'FleetManagerController@editFleetManagerApi');
 Route::post('/deleteFleetManagerApi', 'FleetManagerController@deleteFleetManagerApi');
 Route::post('/makeApiCallToApprove', 'FleetManagerController@makeApiCallToApprove');

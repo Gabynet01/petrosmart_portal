@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AppUsersModel;
 use App\PetrosmartFleetManagerRequests;
 use App\PetrosmartFleetManagers;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class FleetManagerController extends Controller
         ]);
 
         $responseApi = $response->json();
-        
+
         if ($responseApi["code"] == "200") {
             $response_code = $responseApi["code"];
             $response_message = $responseApi["message"];
@@ -46,12 +47,10 @@ class FleetManagerController extends Controller
             $response_message = $responseApi["message"];
         }
         return response()->json(["RESPONSE_MESSAGE" => $response_message, "RESPONSE_DATA" => $responseApi, "RESPONSE_CODE" => $response_code]);
-  
     }
 
     public function addFleetManagerApi(Request $request)
     {
-
         // Get variables from session
         $session_email = Session::get('email');
 
@@ -61,16 +60,24 @@ class FleetManagerController extends Controller
             $response_code = "205";
             $response_message = "Email already exists";
         }
+        //lets check if the email exists
+        else if (AppUsersModel::where("email", $request->get('email'))->exists()) {
+            $creatorForm = AppUsersModel::where("email", $request->get('email'))->first();
+            $response_code = "205";
+            $response_message = "Email already exists";
+        }
         //lets check if mobile number already exists
         else if (PetrosmartFleetManagers::where("mobile_number", $request->get('phoneNumber'))->exists()) {
             $creatorForm = PetrosmartFleetManagers::where("mobile_number", $request->get('mobile_number'))->first();
             $response_code = "205";
             $response_message = "Mobile number already exists";
         } else {
+            $statement = DB::select("show table status like 'users'");
+
             $creatorForm = new PetrosmartFleetManagers();
-            $creatorForm->user_id =  $request->get('user_id');
+            $creatorForm->user_id =  $statement[0]->Auto_increment;
             $creatorForm->name =  $request->get('fullName');
-            $creatorForm->password =  $request->get('password');
+            $creatorForm->password =  bcrypt($request->get('password'));
             $creatorForm->email =  $request->get('email');
             $creatorForm->mobile_number =  $request->get('phoneNumber');
             $creatorForm->created_by =  $session_email;
@@ -78,17 +85,33 @@ class FleetManagerController extends Controller
             $creatorForm->branch_id =  $request->get('addBranchSelect');
             $creatorForm->customer_id =  $request->get('addFleetManagerCompanySelect');
 
+            //add same data in AppUsersModel Table
+            $requesterForm = new AppUsersModel();
+            $requesterForm->group_id  = 3;
+            $requesterForm->active = 1;
+            $requesterForm->email = $request->get('email');
+            $requesterForm->password = bcrypt($request->get('password'));
+            $requesterForm->subscription_expiration =  Carbon::now();
+            $requesterForm->loged_at =  Carbon::now();
+            $requesterForm->sms_gateway_app_date =  Carbon::now();
+            $requesterForm->created_at =  Carbon::now();
+            $requesterForm->updated_at =  Carbon::now();
+
+
             $saveResults = 0;
+            $saveResults2 = 0;
             DB::beginTransaction();
             $saveResults = $creatorForm->save();
+            $saveResults2 = $requesterForm->save();
             DB::commit();
 
-            if ($saveResults) {
+            if ($saveResults && $saveResults2) {
                 $response_code = Response::HTTP_OK;
                 $response_message = "User was created successfully.";
             } else {
                 $response_code = Response::HTTP_SERVICE_UNAVAILABLE;
                 $response_message = "Error.Unable to save";
+                DB::rollBack();
             }
         }
 
@@ -136,18 +159,21 @@ class FleetManagerController extends Controller
         // delete user here 
 
         $requesterForm =  PetrosmartFleetManagers::where("user_id", $request->get('user_id'))->first();
+        $requesterForm2 = AppUsersModel::where("id", $request->get('user_id'))->first();
 
         $saveResults = 0;
         DB::beginTransaction();
         $saveResults = $requesterForm->delete();
+        $saveResults2 = $requesterForm2->delete();
         DB::commit();
 
-        if ($saveResults) {
+        if ($saveResults && $saveResults2) {
             $response_code = Response::HTTP_OK;
             $response_message = "User was deleted successfully";
         } else {
             $response_code = Response::HTTP_SERVICE_UNAVAILABLE;
             $response_message = "Error.Unable to save";
+            DB::rollBack();
         }
         return response()->json(["RESPONSE_MESSAGE" => $response_message, "RESPONSE_DATA" => $requesterForm, "RESPONSE_CODE" => $response_code]);
     }
@@ -225,5 +251,24 @@ class FleetManagerController extends Controller
                     })->make(true);
             }
         }
+    }
+
+
+    //get managers array
+
+    // get fuel stations array
+    public function getManagersArrayApi(Request $request)
+    {
+        $responseObj = [];
+
+        $data = PetrosmartFleetManagers::where('email', "<>", "")
+            ->whereNotNull('email')
+            ->get();
+
+        $responseObj['RESPONSE_CODE'] = Response::HTTP_OK;
+        $responseObj['RESPONSE_DATA'] = $data;
+        $responseObj['RESPONSE_MESSAGE'] = "Managers were pulled successfully";
+
+        return $responseObj;
     }
 }

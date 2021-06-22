@@ -121,25 +121,16 @@ $("#addVoucherBtn").click(function (e) {
 
         }
 
-        $("#addVoucherBtn").prop("disabled", true);
-
+        //first Lets check company wallet balance if its low
         var formData = {
-            "user_id": user_id,
-            "addVoucherCode": utoa(JSON.stringify(driverArray)),
-            "driverVouchersList": JSON.stringify(driverArray),
             "addCustomerContact": addCustomerContact,
-            "addVoucherType": addVoucherType,
-            "addVoucherAmount": addVoucherAmount,
             "totalAmount": totalAmount,
-            "addVoucherCompanyBranchSelect": addVoucherCompanyBranchSelect,
-            "addVoucherCompanyDriverBranchSelect": addVoucherCompanyDriverBranchSelect,
-            "addVoucherExpiryDate": addVoucherExpiryDate
         };
 
         formData = JSON.stringify(formData);
 
         var request = $.ajax({
-            url: "/addPetrosmartFuelVouchersApi",
+            url: "/checkWalletBalanceApi",
             type: "POST",
             data: formData,
             contentType: "application/json"
@@ -147,16 +138,60 @@ $("#addVoucherBtn").click(function (e) {
 
         request.done(function (data) {
             if (data.RESPONSE_CODE == "200") {
-                $("#addVoucherBtn").removeAttr('disabled');
 
-                // set value in storage to remind tabs to load this 
-                sessionStorage.setItem('tabToGoto', 'voucherTab');
+                //if amount to be purchased is lesser or equal to wallet balance proceed with ccreattion
 
-                // console.log(data);
-                location.reload();
+                $("#addVoucherBtn").prop("disabled", true);
 
-                $('#addVoucherModal').modal('hide');
-                displaySuccessToastModal(toTitleCase(data.RESPONSE_MESSAGE), ""); //DISPLAY TOAST
+                var formData = {
+                    "user_id": user_id,
+                    "addVoucherCode": utoa(JSON.stringify(driverArray)),
+                    "driverVouchersList": JSON.stringify(driverArray),
+                    "addCustomerContact": addCustomerContact,
+                    "addVoucherType": addVoucherType,
+                    "addVoucherAmount": addVoucherAmount,
+                    "totalAmount": totalAmount,
+                    "addVoucherCompanyBranchSelect": addVoucherCompanyBranchSelect,
+                    "addVoucherCompanyDriverBranchSelect": addVoucherCompanyDriverBranchSelect,
+                    "addVoucherExpiryDate": addVoucherExpiryDate
+                };
+
+                formData = JSON.stringify(formData);
+
+                var request = $.ajax({
+                    url: "/addPetrosmartFuelVouchersApi",
+                    type: "POST",
+                    data: formData,
+                    contentType: "application/json"
+                });
+
+                request.done(function (data) {
+                    if (data.RESPONSE_CODE == "200") {
+                        $("#addVoucherBtn").removeAttr('disabled');
+
+                        // set value in storage to remind tabs to load this 
+                        sessionStorage.setItem('tabToGoto', 'voucherTab');
+
+                        // console.log(data);
+                        location.reload();
+
+                        $('#addVoucherModal').modal('hide');
+                        displaySuccessToastModal(toTitleCase(data.RESPONSE_MESSAGE), ""); //DISPLAY TOAST
+                    } else {
+                        $("#addVoucherBtn").removeAttr('disabled');
+                        console.log(data)
+                        displayErrorMsgModal(toTitleCase(data.RESPONSE_MESSAGE)); //display Error message
+                    }
+                });
+
+                // Handle when it failed to connect
+                request.fail(function (jqXHR, textStatus) {
+                    console.log(textStatus);
+                    //show the error message
+                    $("#addVoucherBtn").removeAttr('disabled');
+                    displayErrorMsgModal("Sorry, something went wrong");
+                });
+
             } else {
                 $("#addVoucherBtn").removeAttr('disabled');
                 console.log(data)
@@ -169,7 +204,7 @@ $("#addVoucherBtn").click(function (e) {
             console.log(textStatus);
             //show the error message
             $("#addVoucherBtn").removeAttr('disabled');
-            displayErrorMsgModal("Sorry, something went wrong");
+            displayErrorMsgModal("Sorry, something went wrong while checking wallet balance");
         });
 
     }

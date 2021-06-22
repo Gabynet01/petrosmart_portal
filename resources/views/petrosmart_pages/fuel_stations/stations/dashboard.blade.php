@@ -90,7 +90,7 @@
                 </li>
                 @endif
 
-                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "FLEETMANAGER")
+                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "MANAGER")
                 <li><a href="#dropdown-fleet-tables" aria-expanded="false" data-toggle="collapse"><i class="ti-id-badge"></i>
                         <span>Fleet Manager</span>
                     </a>
@@ -262,7 +262,7 @@
                                         <span class="input-group-addon">
                                             <i class="ti-map-alt"></i>
                                         </span>
-                                        <input type="number" class="form-control" id="addGps" placeholder="Enter GPS info">
+                                        <input type="text" class="form-control" id="addGps" placeholder="Latitude, Longitude">
                                     </div>
                                 </div>
                             </div>
@@ -387,7 +387,7 @@
                                         <span class="input-group-addon">
                                             <i class="ti-map-alt"></i>
                                         </span>
-                                        <input type="number" class="form-control" id="editGps" placeholder="Enter GPS info">
+                                        <input type="text" class="form-control" id="editGps" placeholder="Latitude, Longitude">
                                     </div>
                                 </div>
                             </div>

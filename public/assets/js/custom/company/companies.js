@@ -4,6 +4,7 @@ $(document).ready(function () {
     getAdminUsersData();
     getCountriesArray();
     getIndustriesArray();
+    getAllManagersArray();
 });
 
 // Get Company Data
@@ -28,6 +29,7 @@ function getAdminUsersData() {
             { data: 'gps', name: 'gps' },
             { data: 'country_chosen', name: 'country_chosen' },
             { data: 'industry_chosen', name: 'industry_chosen' },
+            { data: 'manager_chosen', name: 'manager_chosen' },
             { data: 'date_created', name: 'date_created' },
             {
                 data: null,
@@ -41,7 +43,7 @@ function getAdminUsersData() {
                     var edit_action = "<a href='#' rel='tooltip' data-customer-edit='" + detailsJson + "' class='' data-toggle='tooltip' data-placement='bottom' title='edit customer'><i class='ti-pencil'></i></a>";
                     var delete_action = "<a href='#' rel='tooltip' data-customer-delete='" + detailsJson + "' class='' data-toggle='tooltip' data-placement='bottom' title='delete customer'><i class='ti-trash'></i></a>";
 
-                    if (userRoleSession == "ADMIN" || userRoleSession == "MANAGER") {
+                    if (userRoleSession == "ADMIN") {
                         return edit_action + " " + delete_action;
                     } else {
                         return "";
@@ -62,11 +64,12 @@ $("#addUserBtn").click(function (e) {
     show_modal_loader();
 
     var user_id;
-    var full_name = $('#addFullname').val();
-    var address = $('#addAddress').val();
-    var industry = $('#addIndustry').val();
-    var gps = $('#addGps').val();
-    var country = $('#addCountry').val();
+    var full_name = $.trim($('#addFullname').val());
+    var address = $.trim($('#addAddress').val());
+    var industry = $.trim($('#addIndustry').val());
+    var gps = $.trim($('#addGps').val());
+    var country = $.trim($('#addCountry').val());
+    var assignedManagers = $.trim($('#addManagerSelect').val());
 
 
     if ((full_name == "" || full_name == undefined) && (address == "" || address == undefined) && (industry == "" || industry == undefined)) {
@@ -87,6 +90,9 @@ $("#addUserBtn").click(function (e) {
     } else if (country == "" || country == undefined) {
         displayErrorMsgModal("Country must be filled"); //display Error message
         return false;
+    } else if (assignedManagers.length == 0 || assignedManagers.length == undefined) {
+        displayErrorMsgModal("Assign at least one manager"); //display Error message
+        return false;
     } else {
 
         // call userRandomString() to get a random id for the user
@@ -101,6 +107,7 @@ $("#addUserBtn").click(function (e) {
             "full_name": full_name,
             "gps": gps,
             "country": country,
+            "assignedManagers": assignedManagers,
             "app_user_id": user_id
         };
 
@@ -159,6 +166,22 @@ $(document).on('click', '[data-customer-edit]', function (e) {
     $('#editGps').val(jsonDetails.gps);
     $('#editCountry').val(jsonDetails.country);
 
+    //fetch all assigned managers 
+    if (jsonDetails.assigned_managers == null || jsonDetails.assigned_managers == "" || jsonDetails.assigned_managers == undefined) {
+        // do nothing
+    } else {
+
+        var hidValue = jsonDetails.assigned_managers;
+
+        var selectedOptions = hidValue.split(",");
+        for (var i in selectedOptions) {
+            var optionVal = selectedOptions[i];
+            $(".edit_manager_selected_picker").find("option[value=" + optionVal + "]").prop("selected", "selected");
+        }
+        $('.edit_manager_selected_picker').selectpicker('refresh')
+
+    }
+
 
     $('#editUserModal').modal('show');
 
@@ -174,7 +197,7 @@ $(document).on('click', '[data-customer-edit]', function (e) {
         var industry = $('#editIndustry').val();
         var gps = $('#editGps').val();
         var country = $('#editCountry').val();
-
+        var assignedManagers = $.trim($('#editManagerSelect').val());
 
         if ((full_name == "" || full_name == undefined) && (address == "" || address == undefined) && (industry == "" || industry == undefined)) {
             displayErrorMsgModal("All fields are required"); //display Error message
@@ -194,8 +217,10 @@ $(document).on('click', '[data-customer-edit]', function (e) {
         } else if (country == "" || country == undefined) {
             displayErrorMsgModal("Country must be filled"); //display Error message
             return false;
+        }  else if (assignedManagers.length == 0 || assignedManagers.length == undefined) {
+            displayErrorMsgModal("Assign at least one manager"); //display Error message
+            return false;
         } else {
-
             // call userRandomString() to get a random id for the user
             user_id = userRandomString();
 
@@ -208,6 +233,7 @@ $(document).on('click', '[data-customer-edit]', function (e) {
                 "full_name": full_name,
                 "gps": gps,
                 "country": country,
+                "assignedManagers": assignedManagers,
                 "app_user_id": user_id
             };
 

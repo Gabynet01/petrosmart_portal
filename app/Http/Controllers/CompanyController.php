@@ -50,6 +50,7 @@ class CompanyController extends Controller
         $creatorForm->full_name =  $request->get('full_name');
         $creatorForm->gps =  $request->get('gps');
         $creatorForm->country =  $request->get('country');
+        $creatorForm->assigned_managers =  $request->get('assignedManagers');
         $creatorForm->created_by =  $session_email;
 
 
@@ -93,7 +94,8 @@ class CompanyController extends Controller
 
                     $query->where('cust_id', "<>", "")
                         ->whereNotNull('cust_id')
-                        ->where('created_by', Session::get('email'))
+                        ->where('assigned_managers', 'like', '%'.Session::get('email').'%')  
+                        // ->where('assigned_managers', Session::get('email'))                     
                         ->orderBy('created_at', 'desc');
                 })->make(true);
         }
@@ -106,7 +108,8 @@ class CompanyController extends Controller
 
                     $query->where('cust_id', "<>", "")
                         ->whereNotNull('cust_id')
-                        ->where('created_by', Session::get('managerEmail'))
+                        ->where('assigned_managers', 'like', '%'.Session::get('managerEmail').'%')
+                        // ->where('created_by', Session::get('managerEmail'))
                         ->orderBy('created_at', 'desc');
                 })->make(true);
         }

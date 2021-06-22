@@ -89,7 +89,7 @@
                 </li>
                 @endif
 
-                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "FLEETMANAGER")
+                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "MANAGER")
                 <li><a href="#dropdown-fleet-tables" aria-expanded="false" data-toggle="collapse"><i class="ti-id-badge"></i>
                         <span>Fleet Manager</span>
                     </a>
@@ -140,7 +140,7 @@
                                 </div>
 
                                 <div class="col-2">
-                                    @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "MANAGER")
+                                    @if(strtoupper(session('userRole')) == "ADMIN")
                                     <h4><a href="#" data-toggle="modal" data-target="#addUserModal" class="btn btn-danger btn-gradient-01 pull-right m-l-20 waves-effect waves-light">Add Company</a></h4>
                                     @endif
                                 </div>
@@ -171,15 +171,18 @@
                                             <th class="sorting" tabIndex="0" aria-controls="sorting-table" rowSpan="1" colSpan="1">Industry
                                             </th>
 
+                                            <th class="sorting" tabIndex="0" aria-controls="sorting-table" rowSpan="1" colSpan="1">Assigned Managers
+                                            </th>
+
                                             <th class="sorting" tabIndex="0" aria-controls="sorting-table" rowSpan="1" colSpan="1">Created Date
                                             </th>
 
-                                            @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "MANAGER")
+                                            @if(strtoupper(session('userRole')) == "ADMIN")
                                             <th class="sorting1" tabIndex="0" aria-controls="sorting-table" rowSpan="1" colSpan="1">Actions
                                             </th>
                                             @endif
 
-                                            @if(strtoupper(session('userRole')) == "USER")
+                                            @if(strtoupper(session('userRole')) == "USER" || strtoupper(session('userRole')) == "MANAGER")
                                             <th>
                                             </th>
                                             @endif
@@ -296,6 +299,14 @@
                                 </div>
                             </div>
 
+                            <div class="col-6">
+                                <label class="form-control-label">Assign Managers</label>
+                                <div class="form-group">
+                                    <select class="custom-select-roletype form-control select_manager_picker" multiple data-live-search="true" id="addManagerSelect" name="addManagerSelect">
+                                    </select>
+                                </div>
+                            </div>
+
                         </div>
 
                     </form>
@@ -394,6 +405,14 @@
                                 <label class="form-control-label">Select Industry</label>
                                 <div class="form-group">
                                     <select class="custom-select-roletype form-control" data-live-search="true" id="editIndustry" name="editIndustry">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-control-label">Assigned Managers</label>
+                                <div class="form-group">
+                                    <select class="custom-select-roletype form-control edit_manager_selected_picker" multiple data-live-search="true" id="editManagerSelect" name="editManagerSelect">
                                     </select>
                                 </div>
                             </div>

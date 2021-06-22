@@ -82,7 +82,7 @@ class AdminController extends Controller
 
 
         if ($loginResp['RESPONSE_CODE'] == Response::HTTP_OK) {
-         
+
             $responseObj['RESPONSE_EXTRA']['EMAIL'] = Session::get('email');
             $responseObj['RESPONSE_EXTRA']['FULLNAME'] = Session::get('full_name');
         }
@@ -100,19 +100,27 @@ class AdminController extends Controller
             $user = PetrosmartOmcUsers::where("email", $username)->where("password", $password)->get();
 
             if (!$user->isEmpty()) {
-                $user = PetrosmartOmcUsers::where("email", $username)->where("password", $password)->first();
-                // Session::put('email', $user->user_id);
-                Session::put('userRole', "OMC");
-                Session::put('userId', strtolower($user->id));
-                Session::put('username', strtolower($user->id));
-                Session::put('email', strtolower($user->id));
-                Session::put('full_name', strtolower($user->name));
+                $user = PetrosmartOmcUsers::where("email", $username)->first();
+                if (password_verify($password, $user->password)) {
+                    // Session::put('email', $user->user_id);
+                    Session::put('userRole', "OMC");
+                    Session::put('userId', strtolower($user->id));
+                    Session::put('username', strtolower($user->id));
+                    Session::put('email', strtolower($user->id));
+                    Session::put('full_name', strtolower($user->name));
 
-                $responseObj['RESPONSE_CODE'] = Response::HTTP_OK;
-                $responseObj['RESPONSE_MESSAGE'] = "Login Successful";
-                $responseObj['RESPONSE_DATA'] = $user;
-                // return redirect()->route('PetrosmartOmc')->with($responseObj);
-                return $responseObj;
+                    $responseObj['RESPONSE_CODE'] = Response::HTTP_OK;
+                    $responseObj['RESPONSE_MESSAGE'] = "Login Successful";
+                    $responseObj['RESPONSE_DATA'] = $user;
+                    // return redirect()->route('PetrosmartOmc')->with($responseObj);
+                    return $responseObj;
+                } else {
+                    session()->flush();
+                    $responseObj['RESPONSE_CODE'] = Response::HTTP_UNAUTHORIZED;
+                    $responseObj['RESPONSE_MESSAGE'] = "Invalid Username Or Password";
+                    // return redirect()->route('login')->with($responseObj);
+                    return $responseObj;
+                }
             } else {
                 session()->flush();
                 $responseObj['RESPONSE_CODE'] = Response::HTTP_UNAUTHORIZED;
@@ -169,7 +177,7 @@ class AdminController extends Controller
                 Session::put('username', strtolower($user->id));
                 Session::put('userId', strtolower($user->id));
                 Session::put('email', strtolower($user->id));
-             
+
                 $responseObj['RESPONSE_CODE'] = Response::HTTP_OK;
                 $responseObj['RESPONSE_MESSAGE'] = "Login Successful";
                 $responseObj['RESPONSE_DATA'] = $user;

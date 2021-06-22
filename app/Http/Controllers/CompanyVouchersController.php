@@ -8,12 +8,13 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\PetrosmartFuelVouchers;
 use App\PetrosmartVoucherList;
-
+use App\PetrosmartWallet;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class CompanyVouchersController extends Controller
 {
@@ -26,6 +27,49 @@ class CompanyVouchersController extends Controller
     {
         $userRole = strtoupper(Session::get('userRole'));
         return view('petrosmart_pages.company.company_vouchers.dashboard');
+    }
+
+    //check wallet balance 
+    public function checkWalletBalanceApi(Request $request)
+    {
+        //lets get the company wallet info
+        if (PetrosmartWallet::where("customer_selected", $request->get('addCustomerContact'))->exists()) {
+            $fetchWalletItems = PetrosmartWallet::where("customer_selected", $request->get('addCustomerContact'))->first();
+
+            //get authorization key and merchant token 
+            $authorization_key = $fetchWalletItems->authorization_key;
+            $merchant_token = $fetchWalletItems->merchant_token;
+        }
+
+        $response = Http::post('http://test.petrosmartgh.com:7777/api/check/wallet/balance', [
+            "merchant_token" =>  $merchant_token,
+            "authorization_key" =>  $authorization_key
+        ]);
+
+        $responseApi = $response->json();
+
+        if ($responseApi["code"] == "200") {
+            //now that we have a successful response
+            //lets compare the wallet balance to the voucher amount to be purchased
+
+            $responseBalance = $responseApi["data"];
+            $floatBalance = (float) $responseBalance["floatBalance"];
+            $totalAmount = (float) $request->get('totalAmount');
+
+            // dd($totalAmount <= $floatBalance);
+
+            if ($totalAmount <= $floatBalance) {
+                $response_code = $responseApi["code"];
+                $response_message = $responseApi["message"];
+            } else {
+                $response_code = "207";
+                $response_message = "Your wallet balance is too low";
+            }
+        } else {
+            $response_code = $responseApi["code"];
+            $response_message = $responseApi["message"];
+        }
+        return response()->json(["RESPONSE_MESSAGE" => $response_message, "RESPONSE_DATA" => $responseApi, "RESPONSE_CODE" => $response_code]);
     }
 
     // add fuel vouchers

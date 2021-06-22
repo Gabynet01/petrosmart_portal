@@ -989,6 +989,59 @@ function loadAllDevices(data) {
 
 }
 
+// get all  managers list
+function getAllManagersArray() {
+    var request = $.ajax({
+        url: "/getManagersArrayApi",
+        type: "GET",
+        contentType: "application/json"
+    });
+
+    request.done(function (data) {
+        if (data.RESPONSE_CODE == "200") {
+            loadAllManagers(data.RESPONSE_DATA);
+        }
+    });
+
+    // Handle when it failed to connect
+    request.fail(function (jqXHR, textStatus) {
+        console.log("Failed to pull managers");
+    });
+
+}
+
+// this gets all the managers list in the db
+function loadAllManagers(data) {
+
+    // Clear the old data
+    $('#addManagerSelect')
+        .find('option')
+        .remove()
+        .end()
+        // .append('<option value="">Select Manager </option>')
+        // .val('')
+    // .append('<option value="new">New Supplier</option>')
+    // .val('new');
+
+    if (data) {
+        var select = $('#addManagerSelect');
+        var select2 = $('#editManagerSelect');
+
+        for (i = 0; i < data.length; i++) {
+            mainData = data[i];
+
+            select.append($("<option></option>").attr("value", mainData["user_id"]).text(mainData["email"]));
+            select2.append($("<option></option>").attr("value", mainData["user_id"]).text(mainData["email"]));
+
+        }
+
+        $('.select_manager_picker').selectpicker();
+        $('.edit_manager_selected_picker').selectpicker();
+  
+    }
+
+}
+
 // get all  vehicles list
 function getAllVehiclesArray() {
     var request = $.ajax({

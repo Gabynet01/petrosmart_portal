@@ -94,7 +94,7 @@
                 </li>
                 @endif
 
-                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "FLEETMANAGER")
+                @if(strtoupper(session('userRole')) == "ADMIN" || strtoupper(session('userRole')) == "MANAGER")
                 <li><a href="#dropdown-fleet-tables" aria-expanded="true" data-toggle="collapse" class="active"><i class="ti-id-badge"></i>
                         <span>Fleet Manager</span>
                     </a>
@@ -147,7 +147,7 @@
                                 </div>
 
                                 <div class="col-2">
-                                    <h4><a href="#" data-toggle="modal" data-target="#addUserModal" class="btn btn-danger btn-gradient-01 pull-right m-l-20 waves-effect waves-light">Add User</a></h4>
+                                    <h4><a href="#" data-toggle="modal" data-target="#addUserModal" class="btn btn-danger btn-gradient-01 pull-right m-l-20 waves-effect waves-light">Add Manager</a></h4>
                                 </div>
                             </div>
 

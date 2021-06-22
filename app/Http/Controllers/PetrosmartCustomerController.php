@@ -402,7 +402,8 @@ class PetrosmartCustomerController extends Controller
         if ($userRole == "MANAGER") {
             $data = PetrosmartCustomers::where('cust_id', "<>", "")
                 ->whereNotNull('cust_id')
-                ->where('created_by', Session::get('email'))
+                ->where('assigned_managers', 'like', '%'.Session::get('email').'%')  
+                // ->where('created_by', Session::get('email'))
                 ->get();
         }
 
@@ -411,7 +412,8 @@ class PetrosmartCustomerController extends Controller
 
             $data = PetrosmartCustomers::where('cust_id', "<>", "")
                 ->whereNotNull('cust_id')
-                ->where('created_by', $managerEmail)
+                ->where('assigned_managers', 'like', '%'.$managerEmail.'%')  
+                // ->where('created_by', $managerEmail)
                 ->get();
         }
 

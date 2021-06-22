@@ -35,7 +35,7 @@ class ManageUsersAndReportsController extends Controller
             $creatorForm = new PetrosmartOmcUsers();
             $creatorForm->user_id =  $request->get('user_id');
             $creatorForm->name =  $request->get('fullName');
-            $creatorForm->password =  $request->get('password');
+            $creatorForm->password =  bcrypt($request->get('password'));
             $creatorForm->email =  $request->get('email');
             $creatorForm->created_by =  $session_email;
 
